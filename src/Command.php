@@ -58,13 +58,17 @@ class Command
 
     private function parseCurrencyRates(string $rates): array
     {
-        $currencies = [];
+        if (!$rates) {
+            throw new InvalidArgumentException("Currency rates are required");
+        }
 
         $currenciesData = explode(',', $rates);
+        $currencies = [];
+
         foreach ($currenciesData as $currencyData) {
             $currencyData = explode(':', $currencyData);
             if (count($currencyData) < 2) {
-                throw new InvalidArgumentException("Invalid currency rate format: {$rates},\n > proper format: CODE:RATE,CODE:RATE");
+                throw new InvalidArgumentException("Invalid currency rates format: {$rates},\n > proper format: CODE:RATE,CODE:RATE");
             }
 
             list($currencyCode, $rate) = $currencyData;
