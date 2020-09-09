@@ -1,0 +1,13 @@
+{
+    "name": "todor_mitev/clippings-invoice-command",
+    "description": "Clippings.com invoicing command challange",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Todor Mitev",
+            "email": "todor_mitev@live.com"
+        }
+    ],
+    "require": {}
+}
