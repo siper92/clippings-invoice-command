@@ -1,0 +1,13 @@
+#!/usr/bin/env php
+<?php
+
+require __DIR__ . '/vendor/autoload.php';
+
+try {
+    (new App\Command($argv))->run();
+} catch(\InvalidArgumentException $e) {
+    echo $e->getMessage() . PHP_EOL;
+    echo "Example: " . PHP_EOL . "\t./console import ./data.csv EUR:1,USD:0.987,GBP:0.878 GBP --vat=123456789" . PHP_EOL;
+} catch (\Exception $e) {
+    echo $e->getMessage() . PHP_EOL;
+}
