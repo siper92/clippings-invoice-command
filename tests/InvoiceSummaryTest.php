@@ -182,15 +182,18 @@ final class InvoiceSummaryTest extends TestCase
         }, $totals), 'Cannot calculate totals correctly with vat number filter');
     }
 
-    public function testGetTotalsWiltOutputCurrencyAndNegativeTotal()
+    public function testHandleCreditsLargerThanTheInvoice()
     {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage("Invoice cannot have negative value!");
+
         $service = (new InvoiceSummary())
             ->setData([
                 ['Vendor 1','123456789','1000000256','1','','USD','200'],
                 ['Vendor 1','123456789','1000000257','1','','USD','200'],
-                ['Vendor 1','123456789','1000000258','2','','USD','300'],
+                ['Vendor 1','123456789','1000000258','1','','USD','300'],
                 ['Vendor 1','123456789','1000000259','2','','USD','300'],
-                ['Vendor 1','123456789','1000000260','2','','USD','200'],
+                ['Vendor 1','123456789','1000000260','2','','USD','401'],
             ])
             ->setCurrencies([
                 new Currency('EUR', 1),
@@ -198,12 +201,7 @@ final class InvoiceSummaryTest extends TestCase
                 new Currency('BGN', 2),
             ]);
 
-        $totals = $service->getTotals('123456789', new Currency('BGN', 2));
-
-        // 400 USD = 200 EUR = 100 BGN
-        $this->assertEquals(['123456789' => -100.0], array_map(function (Total $val) {
-            return $val->getTotal();
-        }, $totals), 'Cannot calculate totals correctly with vat number filter');
+        $service->getTotals(null, new Currency('BGN', 2));
     }
 
     public function testProperCurrencyConversionToOutputCurrency()

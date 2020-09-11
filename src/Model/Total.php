@@ -3,6 +3,8 @@
 
 namespace App\Model;
 
+use RuntimeException;
+
 class Total
 {
     private $customerName;
@@ -18,6 +20,10 @@ class Total
 
     public function subtract(float $value): Total
     {
+        if ($value > $this->total) {
+            throw new RuntimeException("Invoice cannot have negative value!");
+        }
+
         $this->total = $this->total - $value;
 
         return $this;
