@@ -1,4 +1,4 @@
-#Todor Mitev Solution to clippings task
+# Todor Mitev Solution to clippings task
 
 
 to run the console application
