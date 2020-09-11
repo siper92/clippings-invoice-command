@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Model\Currency;
+use App\Service\InvoiceSummary;
 use InvalidArgumentException;
 
 class Command
@@ -18,7 +19,7 @@ class Command
     private $currencyRates;
 
     /**
-     * @var string
+     * @var Currency
      */
     private $outputCurrencyCode;
 
@@ -35,10 +36,11 @@ class Command
 
         $this->dataSourcePath = $this->parseImportPath($cliArgs[2]);
         $this->currencyRates = $this->parseCurrencyRates($cliArgs[3]);
-        $this->outputCurrencyCode = $cliArgs[4];
-        if (!isset($this->currencyRates[$this->outputCurrencyCode])) {
-            throw new InvalidArgumentException("Unsupported output currency: {$this->outputCurrencyCode}");
+
+        if (!isset($this->currencyRates[$cliArgs[4]])) {
+            throw new InvalidArgumentException("Unsupported output currency: {$cliArgs[4]}");
         }
+        $this->outputCurrencyCode = $this->currencyRates[$cliArgs[4]];
 
         if (isset($cliArgs[5])) {
             $this->vatFilter = $this->parseVatFilter($cliArgs[5]);
@@ -56,6 +58,10 @@ class Command
         return $dataSourcePath;
     }
 
+    /**
+     * @param string $rates
+     * @return Currency[]
+     */
     private function parseCurrencyRates(string $rates): array
     {
         if (!$rates) {
@@ -87,9 +93,33 @@ class Command
         return str_replace('--vat=', '', $vatFilter);
     }
 
+    public function getInvoicesData(): array
+    {
+        $result = [];
+
+        $source = file($this->dataSourcePath);
+        foreach ($source as $i => $line) {
+            if ($i == 0) {
+                continue;
+            }
+
+            $result[] = str_getcsv($line);
+        }
+
+        return $result;
+    }
+
 
     public function run()
     {
-        echo 'test';
+        $totalsService = (new InvoiceSummary())
+            ->setData($this->getInvoicesData())
+            ->setCurrencies($this->currencyRates);
+
+        $totals = $totalsService->getTotals($this->vatFilter, $this->outputCurrencyCode);
+
+        foreach ($totals as $total) {
+            echo $total . PHP_EOL;
+        }
     }
 }
